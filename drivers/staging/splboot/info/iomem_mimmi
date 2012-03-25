@@ -1,0 +1,26 @@
+$ cat proc/iomem
+00200000-0d8fffff : System RAM
+0022b000-00711fff : Kernel text
+00712000-0084203b : Kernel data
+02800000-029fffff : kgsl_phys_memory
+0d200000-0d8fffff : Crash kernel
+0d9e0000-0d9fffff : ram_console
+a0000000-a001ffff : kgsl_reg_memory
+a0000000-a001ffff : kgsl
+a0200000-a0200fff : msm_serial_hs.0
+a0300000-a0300fff : msm_serial_hs.1
+a0400000-a0400fff : msm_sdcc.1
+a0500000-a0500fff : TIWLAN_SDIO.2
+a0800000-a08003ff : msm_hsusb
+a0800000-a08003ff : msm_hsusb_periphera
+a0800000-a08003ff : msm_hsusb_host.0
+a0800000-a08003ff : msm_hsusb_otg
+a0800000-a08003ff : msm_otg
+a0a00000-a0a007ff : msm_nand_phys
+a9900000-a9900fff : msm_i2c.0
+a9900000-a9900fff : msm_i2c
+a9c00000-a9c00fff : msm_serial.2
+a9c00000-a9c00fff : msm_serial
+aa200000-aa2effff : mdp
+aa300000-aa300fff : tssc
+aa600000-aa600fff : pmdh

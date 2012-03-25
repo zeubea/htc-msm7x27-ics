@@ -1,0 +1,9 @@
+menu "Mem Dump Support"
+
+config MEM_DUMP_CHAR
+	tristate "char driver interface to dump phisical memory"
+	default m
+	depends on ARCH_MSM || ARCH_QSD
+	help
+	 Char driver interface for diag user space and diag-forwarding to ARM9 and back.
+endmenu

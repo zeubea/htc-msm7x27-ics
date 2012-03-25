@@ -1,0 +1,8 @@
+menu "splboot module support"
+
+config SPLBOOT
+	tristate "splboot module support"
+	default m
+	help
+	 For execute splload image.
+endmenu
