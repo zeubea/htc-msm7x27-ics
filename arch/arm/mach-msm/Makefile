@@ -11,7 +11,7 @@ obj-y += irq.o devices.o pmic.o vreg.o pwrtest.o
 endif
 
 obj-$(CONFIG_ARCH_QSD8X50) += sirc.o
-obj-y += proc_comm.o
+obj-y += proc_comm.o internal_power_rail.o
 obj-$(CONFIG_ARCH_MSM_ARM11) += acpuclock-arm11.o idle.o
 obj-$(CONFIG_ARCH_QSD8X50) += arch-init-scorpion.o acpuclock-scorpion.o
 obj-$(CONFIG_ARCH_MSM7X30) += acpuclock-7x30.o internal_power_rail.o

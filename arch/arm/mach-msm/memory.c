@@ -158,3 +158,5 @@ int platform_physical_low_power_pages(unsigned long start_pfn,
 {
 	return 1;
 }
+
+
