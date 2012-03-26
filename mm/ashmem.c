@@ -637,8 +637,8 @@ static unsigned int virtaddr_to_physaddr(unsigned int virtaddr)
 	pgd_t *pgd_ptr = NULL;
 	pmd_t *pmd_ptr = NULL;
 	pte_t *pte_ptr = NULL, pte;
-	spin_lock(&current->mm->page_table_lock);
 
+	spin_lock(&current->mm->page_table_lock);
 	pgd_ptr = pgd_offset(current->mm, virtaddr);
 	if (pgd_none(*pgd) || pgd_bad(*pgd)) {
 		pr_err("Failed to convert virtaddr %x to pgd_ptr\n",
@@ -669,7 +669,9 @@ done:
 }
 #endif
 
-static int ashmem_flush_cache_range(struct ashmem_area *asma)
+static int ashmem_cache_op(struct ashmem_area *asma,
+	void (*cache_func)(unsigned long vstart, unsigned long length,
+				unsigned long pstart))
 {
 #ifdef CONFIG_OUTER_CACHE
 	unsigned long vaddr;
@@ -868,3 +870,4 @@ module_init(ashmem_init);
 module_exit(ashmem_exit);
 
 MODULE_LICENSE("GPL");
+
