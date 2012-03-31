@@ -33,6 +33,7 @@
 #include <linux/notifier.h>
 #include <linux/pm_runtime.h>
 #include <asm/atomic.h>
+#include <linux/genlock.h>
 
 #include <linux/ashmem.h>
 
@@ -56,6 +57,66 @@ int kgsl_pagetable_count = KGSL_PAGETABLE_COUNT;
 module_param_named(ptcount, kgsl_pagetable_count, int, 0);
 MODULE_PARM_DESC(kgsl_pagetable_count,
 "Minimum number of pagetables for KGSL to allocate at initialization time");
+
+#ifdef CONFIG_GENLOCK
+
+/**
+ * kgsl_add_event - Add a new timstamp event for the KGSL device
+ * @device - KGSL device for the new event
+ * @ts - the timestamp to trigger the event on
+ * @cb - callback function to call when the timestamp expires
+ * @priv - private data for the specific event type
+ *
+ * @returns - 0 on success or error code on failure
+ */
+
+static int kgsl_add_event(struct kgsl_device *device, u32 ts,
+	void (*cb)(struct kgsl_device *, void *, u32), void *priv)
+{
+	struct kgsl_event *event;
+	struct list_head *n;
+	/* FIXME
+	unsigned int cur = device->ftbl->readtimestamp(device,
+	*/
+	unsigned int cur = device->ftbl.device_cmdstream_readtimestamp(device,
+		KGSL_TIMESTAMP_RETIRED);
+
+	if (cb == NULL)
+		return -EINVAL;
+
+	/* Check to see if the requested timestamp has already fired */
+
+	if (timestamp_cmp(cur, ts) >= 0) {
+		cb(device, priv, cur);
+		return 0;
+	}
+
+	event = kzalloc(sizeof(*event), GFP_KERNEL);
+	if (event == NULL)
+		return -ENOMEM;
+
+	event->timestamp = ts;
+	event->priv = priv;
+	event->func = cb;
+
+	/* Add the event in order to the list */
+
+	for (n = device->events.next ; n != &device->events; n = n->next) {
+		struct kgsl_event *e =
+			list_entry(n, struct kgsl_event, list);
+
+		if (timestamp_cmp(e->timestamp, ts) > 0) {
+			list_add(&event->list, n->prev);
+			break;
+		}
+	}
+
+	if (n == &device->events)
+		list_add_tail(&event->list, &device->events);
+
+	return 0;
+}
+#endif
 
 static void kgsl_put_phys_file(struct file *file);
 
@@ -1649,6 +1710,115 @@ done:
 	return result;
 }
 
+#ifdef CONFIG_GENLOCK
+struct kgsl_genlock_event_priv {
+	struct genlock_handle *handle;
+	struct genlock *lock;
+};
+
+/**
+ * kgsl_genlock_event_cb - Event callback for a genlock timestamp event
+ * @device - The KGSL device that expired the timestamp
+ * @priv - private data for the event
+ * @timestamp - the timestamp that triggered the event
+ *
+ * Release a genlock lock following the expiration of a timestamp
+ */
+
+static void kgsl_genlock_event_cb(struct kgsl_device *device,
+	void *priv, u32 timestamp)
+{
+	struct kgsl_genlock_event_priv *ev = priv;
+	int ret;
+
+	ret = genlock_lock(ev->handle, GENLOCK_UNLOCK, 0, 0);
+	if (ret)
+		KGSL_CORE_ERR("Error while unlocking genlock: %d\n", ret);
+
+	genlock_put_handle(ev->handle);
+
+	kfree(ev);
+}
+
+/**
+ * kgsl_add_genlock-event - Create a new genlock event
+ * @device - KGSL device to create the event on
+ * @timestamp - Timestamp to trigger the event
+ * @data - User space buffer containing struct kgsl_genlock_event_priv
+ * @len - length of the userspace buffer
+ * @returns 0 on success or error code on error
+ *
+ * Attack to a genlock handle and register an event to release the
+ * genlock lock when the timestamp expires
+ */
+
+static int kgsl_add_genlock_event(struct kgsl_device *device,
+	u32 timestamp, void __user *data, int len)
+{
+	struct kgsl_genlock_event_priv *event;
+	struct kgsl_timestamp_event_genlock priv;
+	int ret;
+
+	if (len !=  sizeof(priv))
+		return -EINVAL;
+
+	if (copy_from_user(&priv, data, sizeof(priv)))
+		return -EFAULT;
+
+	event = kzalloc(sizeof(*event), GFP_KERNEL);
+
+	if (event == NULL)
+		return -ENOMEM;
+
+	event->handle = genlock_get_handle_fd(priv.handle);
+
+	if (IS_ERR(event->handle)) {
+		int ret = PTR_ERR(event->handle);
+		kfree(event);
+		return ret;
+	}
+
+	ret = kgsl_add_event(device, timestamp, kgsl_genlock_event_cb, event);
+	if (ret)
+		kfree(event);
+
+	return ret;
+}
+#else
+
+static long kgsl_add_genlock_event(struct kgsl_device *device,
+	u32 timestamp, void __user *data, int len)
+{
+	return -EINVAL;
+}
+#endif
+
+/**
+ * kgsl_ioctl_timestamp_event - Register a new timestamp event from userspace
+ * @dev_priv - pointer to the private device structure
+ * @cmd - the ioctl cmd passed from kgsl_ioctl
+ * @data - the user data buffer from kgsl_ioctl
+ * @returns 0 on success or error code on failure
+ */
+
+static long kgsl_ioctl_timestamp_event(struct kgsl_device_private *dev_priv,
+	unsigned int cmd, void *data)
+{
+	struct kgsl_timestamp_event *param = data;
+	int ret;
+
+	switch (param->type) {
+		case KGSL_TIMESTAMP_EVENT_GENLOCK:
+			ret = kgsl_add_genlock_event(dev_priv->device,
+				param->timestamp, param->priv, param->len);
+			break;
+		default:
+			ret = -EINVAL;
+	}
+
+	return ret;
+}
+
 typedef long (*kgsl_ioctl_func_t)(struct kgsl_device_private *,
 	unsigned int, void *);
 
@@ -1662,8 +1832,6 @@ static const struct {
 } kgsl_ioctl_funcs[] = {
 	KGSL_IOCTL_FUNC(IOCTL_KGSL_DEVICE_GETPROPERTY,
 			kgsl_ioctl_device_getproperty, 1),
-	KGSL_IOCTL_FUNC(IOCTL_KGSL_DEVICE_REGREAD,
-			kgsl_ioctl_device_regread, 1),
 	KGSL_IOCTL_FUNC(IOCTL_KGSL_DEVICE_WAITTIMESTAMP,
 			kgsl_ioctl_device_waittimestamp, 1),
 	KGSL_IOCTL_FUNC(IOCTL_KGSL_RINGBUFFER_ISSUEIBCMDS,
@@ -1686,6 +1854,10 @@ static const struct {
 			kgsl_ioctl_sharedmem_from_vmalloc, 0),
 	KGSL_IOCTL_FUNC(IOCTL_KGSL_SHAREDMEM_FLUSH_CACHE,
 			kgsl_ioctl_sharedmem_flush_cache, 0),
+	KGSL_IOCTL_FUNC(IOCTL_KGSL_TIMESTAMP_EVENT,
+			kgsl_ioctl_timestamp_event, 1),
+	KGSL_IOCTL_FUNC(IOCTL_KGSL_DEVICE_REGREAD,
+			kgsl_ioctl_device_regread, 1),
 };
 
 static long kgsl_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
