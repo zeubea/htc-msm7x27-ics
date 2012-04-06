@@ -994,22 +994,41 @@ static inline void sock_lock_init(struct sock *sk)
 /*
  * Copy all fields from osk to nsk but nsk->sk_refcnt must not change yet,
  * even temporarly, because of RCU lookups. sk_node should also be left as is.
+ * We must not copy fields between sk_dontcopy_begin and sk_dontcopy_end
  */
 static void sock_copy(struct sock *nsk, const struct sock *osk)
 {
 #ifdef CONFIG_SECURITY_NETWORK
 	void *sptr = nsk->sk_security;
 #endif
-	BUILD_BUG_ON(offsetof(struct sock, sk_copy_start) !=
-		     sizeof(osk->sk_node) + sizeof(osk->sk_refcnt) +
-		     sizeof(osk->sk_tx_queue_mapping));
-	memcpy(&nsk->sk_copy_start, &osk->sk_copy_start,
-	       osk->sk_prot->obj_size - offsetof(struct sock, sk_copy_start));
+	memcpy(nsk, osk, offsetof(struct sock, sk_dontcopy_begin));
+
+	memcpy(&nsk->sk_dontcopy_end, &osk->sk_dontcopy_end,
+	       osk->sk_prot->obj_size - offsetof(struct sock, sk_dontcopy_end));
+
 #ifdef CONFIG_SECURITY_NETWORK
 	nsk->sk_security = sptr;
 	security_sk_clone(osk, nsk);
 #endif
 }
+
+void sk_prot_clear_portaddr_nulls(struct sock *sk, int size)
+{
+        unsigned long nulls1, nulls2;
+
+        nulls1 = offsetof(struct sock, __sk_common.skc_node.next);
+        nulls2 = offsetof(struct sock, __sk_common.skc_portaddr_node.next);
+        if (nulls1 > nulls2)
+                swap(nulls1, nulls2);
+
+        if (nulls1 != 0)
+                memset((char *)sk, 0, nulls1);
+        memset((char *)sk + nulls1 + sizeof(void *), 0,
+               nulls2 - nulls1 - sizeof(void *));
+        memset((char *)sk + nulls2 + sizeof(void *), 0,
+               size - nulls2 - sizeof(void *));
+}
+EXPORT_SYMBOL(sk_prot_clear_portaddr_nulls);
 
 static struct sock *sk_prot_alloc(struct proto *prot, gfp_t priority,
 		int family)

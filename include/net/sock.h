@@ -124,6 +124,11 @@ struct net;
  *	for struct sock and struct inet_timewait_sock.
  */
 struct sock_common {
+	/* skc_daddr and skc_rcv_saddr must be grouped :
+	 * cf INET_MATCH() and INET_TW_MATCH()
+	 */
+	__be32			skc_daddr;
+	__be32			skc_rcv_saddr;
 	/*
 	 * first fields are not copied in sock_copy()
 	 */
@@ -150,6 +155,20 @@ struct sock_common {
 #ifdef CONFIG_NET_NS
 	struct net	 	*skc_net;
 #endif
+        /*
+         * fields between dontcopy_begin/dontcopy_end
+         * are not copied in sock_copy()
+         */
+        /* private: */
+        int                     skc_dontcopy_begin[0];
+        /* public: */
+        union {
+                struct hlist_node       skc_node;
+                struct hlist_nulls_node skc_nulls_node;
+        };
+        /* private: */
+        int                     skc_dontcopy_end[0];
+        /* public: */
 };
 
 /**
@@ -230,7 +249,8 @@ struct sock {
 #define sk_refcnt		__sk_common.skc_refcnt
 #define sk_tx_queue_mapping	__sk_common.skc_tx_queue_mapping
 
-#define sk_copy_start		__sk_common.skc_hash
+#define sk_dontcopy_begin       __sk_common.skc_dontcopy_begin
+#define sk_dontcopy_end         __sk_common.skc_dontcopy_end
 #define sk_hash			__sk_common.skc_hash
 #define sk_family		__sk_common.skc_family
 #define sk_state		__sk_common.skc_state
@@ -751,6 +771,7 @@ struct proto {
 	void			(*unhash)(struct sock *sk);
 	void			(*rehash)(struct sock *sk);
 	int			(*get_port)(struct sock *sk, unsigned short snum);
+	void			(*clear_sk)(struct sock *sk, int size);
 
 	/* Keeping track of sockets in use */
 #ifdef CONFIG_PROC_FS
@@ -847,6 +868,8 @@ static inline void __sk_prot_rehash(struct sock *sk)
 	sk->sk_prot->unhash(sk);
 	sk->sk_prot->hash(sk);
 }
+
+void sk_prot_clear_portaddr_nulls(struct sock *sk, int size);
 
 /* About 10 seconds */
 #define SOCK_DESTROY_TIME (10*HZ)

@@ -197,7 +197,7 @@ static struct microp_led_config led_config[] = {
 		.type = LED_RGB,
 	},
 	{
-		.name   = "button-backlight",
+		.name = "button-backlight",
 		.type = LED_GPO,
 		.mask_w = {0x00, 0x00, 0x08},
 	},

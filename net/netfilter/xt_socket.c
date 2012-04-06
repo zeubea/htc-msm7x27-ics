@@ -26,6 +26,7 @@
 #define XT_SOCKET_HAVE_IPV6 1
 #include <linux/netfilter_ipv6/ip6_tables.h>
 #include <net/netfilter/ipv6/nf_defrag_ipv6.h>
+#include <net/ipv6.h>
 #endif
 
 #include <linux/netfilter/xt_socket.h>
