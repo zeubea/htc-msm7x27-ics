@@ -28,8 +28,8 @@
 #include "kgsl_yamato.h"
 
 /*default log levels is error for everything*/
-//#define KGSL_LOG_LEVEL_DEFAULT 3
-#define KGSL_LOG_LEVEL_DEFAULT 7
+#define KGSL_LOG_LEVEL_DEFAULT 3
+//#define KGSL_LOG_LEVEL_DEFAULT 7
 #define KGSL_LOG_LEVEL_MAX     7
 
 struct dentry *kgsl_debugfs_dir;

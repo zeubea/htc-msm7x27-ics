@@ -163,8 +163,9 @@ static void report_key(struct gpio_kp *kp, int key_index, int out, int in)
 		if (need_send_spec_key == pressed) {
 			curcial_oj_send_key(keycode, pressed);
 			need_send_spec_key = !pressed;
-			KEY_LOGI("%s: send OJ action key, pressed: %d\n",
-				__func__, pressed);
+			printk(KERN_INFO "%s: send OJ action key, pressed: %d\n",
+					__func__, need_send_spec_key);
+			input_report_key(kp->input_devs->dev[dev], keycode, pressed);
 		}
 	}
 #endif
