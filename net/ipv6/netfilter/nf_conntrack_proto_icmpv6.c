@@ -187,6 +187,7 @@ icmpv6_error(struct net *net, struct nf_conn *tmpl,
 {
 	const struct icmp6hdr *icmp6h;
 	struct icmp6hdr _ih;
+	extern struct nf_conn nf_conntrack_untracked;
 	int type;
 
 	icmp6h = skb_header_pointer(skb, dataoff, sizeof(_ih), &_ih);
