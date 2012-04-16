@@ -132,14 +132,6 @@ struct msm_vfe_evt_msg {
 	unsigned short exttype;
 };
 
-struct msm_vpe_evt_msg {
-	unsigned short type; /* 1 == event (RPC), 0 == message (adsp) */
-	unsigned short msg_id;
-	unsigned int len; /* size in, number of bytes out */
-	uint32_t frame_id;
-	void *data;
-};
-
 #define MSM_CAM_RESP_CTRL         0
 #define MSM_CAM_RESP_STAT_EVT_MSG 1
 #define MSM_CAM_RESP_V4L2         2
@@ -241,12 +233,6 @@ struct msm_camera_cfg_cmd {
 
 /* vfe config command: config command(from config thread)*/
 struct msm_vfe_cfg_cmd {
-	int cmd_type;
-	uint16_t length;
-	void *value;
-};
-
-struct msm_vpe_cfg_cmd {
 	int cmd_type;
 	uint16_t length;
 	void *value;
