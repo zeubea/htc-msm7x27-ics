@@ -1221,7 +1221,7 @@ CONFIG_SERIAL_BCM_BT_LPM=y
 CONFIG_DIAG_CHAR=y
 
 #memdump/memwrite
-# CONFIG_MEM_DUMP_CHAR is not set
+## CONFIG_MEM_DUMP_CHAR is not set
 
 #
 # DIAG traffic over USB

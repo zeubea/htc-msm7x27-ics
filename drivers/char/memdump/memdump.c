@@ -73,6 +73,41 @@ static ssize_t memdump_write(struct file *file, const char __user *buf, size_t c
 	return count;
 }
 
+void msm_nand_hack_test(void)
+{
+	unsigned *pa;
+
+	pa=ioremap(0xA900026C, 4096);	pa[0]=0x00000009;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00020, 4096);	pa[0]=0xAA5400C0;	iounmap(pa);
+	pa=ioremap(0xA0A00024, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000031;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00024, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00020, 4096);	pa[0]=0xAA5400C0;	iounmap(pa);
+	pa=ioremap(0xA0A00024, 4096);	pa[0]=0x000A7476;	iounmap(pa);
+	pa=ioremap(0xA0A00004, 4096);	pa[0]=0x00000000;	iounmap(pa);
+	pa=ioremap(0xA0A00008, 4096);	pa[0]=0x00000000;	iounmap(pa);
+	pa=ioremap(0xA0A00024, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00004, 4096);	pa[0]=0x00010000;	iounmap(pa);
+	pa=ioremap(0xA0A00008, 4096);	pa[0]=0x00000000;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000031;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
+	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
+}
 
 static int __init memdump_init(void)
 {
@@ -130,6 +165,8 @@ static int __init memdump_init(void)
 	printk("NAND_FLASH_READ_ID = %X, NAND_FLASH_READ_STATUS =%X\n", pa[16],pa[17]);
 
 	iounmap(pa);
+
+	msm_nand_hack_test();
 
 	return 0;
 }
