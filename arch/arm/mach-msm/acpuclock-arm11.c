@@ -125,9 +125,11 @@ static struct clkctl_acpu_speed msm7227_tbl[] = {
 	{  768000, ACPU_PLL_0, 4, 1, 192000, 3, VDD_7, 192000, 0, 5, -1, 0x28 },
 	{  787200, ACPU_PLL_0, 4, 1, 196800, 3, VDD_7, 196800, 0, 5, -1, 0x29 },
 	{  806400, ACPU_PLL_0, 4, 1, 201600, 3, VDD_7, 201600, 0, 5, -1, 0x2a },
+#if 0 /* disable values which will probably toast the device */
 	{  825600, ACPU_PLL_0, 4, 1, 206400, 3, VDD_7, 206400, 0, 6, -1, 0x2b },
 	{  844800, ACPU_PLL_0, 4, 1, 211200, 3, VDD_7, 211200, 0, 6, -1, 0x2c },
 	{  864000, ACPU_PLL_0, 4, 1, 216000, 3, VDD_7, 216000, 0, 6, -1, 0x2d },
+#endif
 	{  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 };
 /* PLL0(mpll): 960MHz, PLL1(gpll):245.76MHz, PLL2(bpll): 800MHz */
@@ -192,11 +194,13 @@ static struct cpufreq_frequency_table msm7227_freq_table[] = {
 	{ 7, 768000 },
 	{ 8, 787200 },
 	{ 9, 806400 },
-	{ 10, 825600 },
+/*	{ 10, 825600 },
 	{ 11, 844800 },
 	{ 12, 864000 },
-	{ 13, CPUFREQ_TABLE_END },
+*/
+	{ 10, CPUFREQ_TABLE_END },
 };
+
 static struct cpufreq_frequency_table msm72xx_freq_table[] = {
 #if defined(CONFIG_TURBO_MODE)
 	{ 0, 19200 },
@@ -712,24 +716,24 @@ static void __init acpu_freq_tbl_fixup(void)
 
 	/* Select the right table to use. */
 	for (lst = acpu_freq_tbl_list; lst->tbl != 0; lst++) {
-		if ((lst->machine == MACH_TYPE_CHACHA)||(lst->machine == MACH_TYPE_ICONG)){
-				if (socinfo_init() < 0)
-					BUG();
-				if ((SOCINFO_VERSION_MAJOR(socinfo_get_version()) > 1)
-					|| ((SOCINFO_VERSION_MAJOR(socinfo_get_version()) == 1)
-					&& (SOCINFO_VERSION_MINOR(socinfo_get_version()) >= 3)))
-					{
-						acpu_freq_tbl = lst->tbl;
-						freq_table = lst->freq_tbl;
-						break;
-					}
+		if ((lst->machine == MACH_TYPE_CHACHA)||(lst->machine == MACH_TYPE_ICONG)) {
+			if (socinfo_init() < 0)
+				BUG();
+			if ((SOCINFO_VERSION_MAJOR(socinfo_get_version()) > 1)
+				|| ((SOCINFO_VERSION_MAJOR(socinfo_get_version()) == 1)
+				&& (SOCINFO_VERSION_MINOR(socinfo_get_version()) >= 3)))
+				{
+					acpu_freq_tbl = lst->tbl;
+					freq_table = lst->freq_tbl;
+					break;
+				}
 				else {
 					lst++;
 					acpu_freq_tbl = lst->tbl;
 					freq_table = lst->freq_tbl;
 					break;
 				}
-			}
+		}
 		else if (lst->machine == machine_arch_type) {
 			acpu_freq_tbl = lst->tbl;
 			freq_table = lst->freq_tbl;
