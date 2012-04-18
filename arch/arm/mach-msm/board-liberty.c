@@ -173,7 +173,7 @@ static struct microp_function_config microp_functions[] = {
 static struct microp_function_config microp_lightsensor = {
 	.name = "light_sensor",
 	.category = MICROP_FUNCTION_LSENSOR,
-	//cardsharing-x levels defined in lightsensor driver!
+	/* levels defined in android lightsensor lib! */
 	.levels = { 0, 0x21, 0x4D, 0xDC, 0x134, 0x18D, 0x1E5, 0x2BA, 0x35C, 0x3FF },
 	//.levels = { 0, 0x21, 0x4D, 0xDC, 0x134, 0x18D, 0x1E5, 0x3FF, 0x3FF, 0x3FF },
 	.channel = 3,
