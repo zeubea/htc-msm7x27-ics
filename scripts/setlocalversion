@@ -168,4 +168,4 @@ else
 	fi
 fi
 
-echo "$res-"`date -u +%b-%d-%Y`
+echo "$res"
