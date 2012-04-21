@@ -1654,14 +1654,14 @@ struct msm_nand_info {
 	struct msm_nand_chip	msm_nand;
 };
 
-/*#ifdef CONFIG_MTD_PARTITIONS
+#ifdef CONFIG_MTD_PARTITIONS
 const struct mtd_partition full_nand_partition_info[] = {
 	[0]{
 		.name	= "hboot",
 		.offset	= 0x2400000,
 		.size	= 0x80000,
 	},
-	[1]{
+/*	[1]{
 		.name	= "misc",
 		.offset	= 0x1ff60000,
 		.size	= 0xa0000,
@@ -1690,9 +1690,9 @@ const struct mtd_partition full_nand_partition_info[] = {
 		.name	= "userdata",
 		.offset	= 0xd340000,
 		.size	= 0x12c20000,
-	},
+	},*/
 };
-#endif*/
+#endif
 
 static int __devinit msm_nand_probe(struct platform_device *pdev)
 {
@@ -1755,7 +1755,7 @@ static int __devinit msm_nand_probe(struct platform_device *pdev)
 	if (err > 0)
 		add_mtd_partitions(&info->mtd, info->parts, err);
 	else if (err <= 0 && pdata && pdata->parts) {
-		//add_mtd_partitions(&info->mtd, full_nand_partition_info, 7);
+		add_mtd_partitions(&info->mtd, full_nand_partition_info, 1);
 		add_mtd_partitions(&info->mtd, pdata->parts, pdata->nr_parts);
 	} else
 #endif
