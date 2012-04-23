@@ -127,7 +127,6 @@ struct msm_vfe_evt_msg {
 	unsigned short type; /* 1 == event (RPC), 0 == message (adsp) */
 	unsigned short msg_id;
 	unsigned int len; /* size in, number of bytes out */
-	uint32_t frame_id;
 	void *data;
 	unsigned short exttype;
 };
@@ -296,7 +295,6 @@ struct msm_pmem_info {
 	uint32_t y_off; /* relative to offset */
 	uint32_t cbcr_off; /* relative to offset */
 	uint8_t vfe_can_write;
-	uint8_t active;
 };
 
 struct outputCfg {
@@ -428,21 +426,5 @@ struct msm_camera_info {
 	uint8_t has_3d_support[MAX_SENSOR_NUM];
 	uint8_t is_internal_cam[MAX_SENSOR_NUM];
 };
-
-// camera fatal errors
-enum {
-    CAMERA_ERROR_UKNOWN  = 1,
-    CAMERA_ERROR_RESOURCE = 2,
-};
-
-#define CAMERA_EFFECT_OFF		0
-#define CAMERA_EFFECT_MONO		1
-#define CAMERA_EFFECT_NEGATIVE		2
-#define CAMERA_EFFECT_SOLARIZE		3
-#define CAMERA_EFFECT_SEPIA		4
-#define CAMERA_EFFECT_POSTERIZE		5
-#define CAMERA_EFFECT_WHITEBOARD	6
-#define CAMERA_EFFECT_BLACKBOARD	7
-#define CAMERA_EFFECT_AQUA		8
 
 #endif /* __LINUX_MSM_CAMERA_H */
