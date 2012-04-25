@@ -1114,11 +1114,16 @@ static struct attribute_group liberty_properties_attr_group = {
 static void __init liberty_init(void)
 {
 	int rc;
+	int sku_id = 0;
 	char *cid = NULL;
 	struct kobject *properties_kobj;
 
 	printk("liberty_init() revision = 0x%X\n", system_rev);
 	board_get_cid_tag(&cid);
+	sku_id = board_get_sku_tag();
+
+	if (sku_id)
+		printk(KERN_INFO "Liberty show_skuid: 0x%x\n", sku_id);
 
 	/* for bcm */
 	bt_export_bd_address();

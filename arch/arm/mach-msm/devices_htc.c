@@ -605,6 +605,12 @@ char *board_serialno(void)
 	return board_sn;
 }
 
+static int sku_id;
+int board_get_sku_tag(void)
+{
+	return sku_id;
+}
+
 #define ATAG_SKUID 0x4d534D73
 int __init parse_tag_skuid(const struct tag *tags)
 {
@@ -619,8 +625,10 @@ int __init parse_tag_skuid(const struct tag *tags)
 		}
 	}
 
-	if (find)
+	if (find) {
 		skuid = t->u.revision.rev;
+		sku_id = skuid;
+	}
 	printk(KERN_DEBUG "parse_tag_skuid: hwid = 0x%x\n", skuid);
 	return skuid;
 }
