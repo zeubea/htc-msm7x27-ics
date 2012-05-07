@@ -579,8 +579,8 @@ static struct msm_pmem_setting pmem_setting = {
 	.pmem_camera_size = MSM_PMEM_CAMERA_SIZE,
 	.ram_console_start = MSM_RAM_CONSOLE_BASE,
 	.ram_console_size = MSM_RAM_CONSOLE_SIZE,
-        .kgsl_start = MSM_GPU_MEM_BASE,
-        .kgsl_size = MSM_GPU_MEM_SIZE,
+	.kgsl_start = MSM_GPU_MEM_BASE,
+	.kgsl_size = MSM_GPU_MEM_SIZE,
 };
 
 
