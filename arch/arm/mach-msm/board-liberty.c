@@ -575,8 +575,10 @@ static struct msm_pmem_setting pmem_setting = {
 	.pmem_size = MSM_PMEM_MDP_SIZE,
 	.pmem_adsp_start = MSM_PMEM_ADSP_BASE,
 	.pmem_adsp_size = MSM_PMEM_ADSP_SIZE,
+/* this is not needed for cm9
 	.pmem_camera_start = MSM_PMEM_CAMERA_BASE,
 	.pmem_camera_size = MSM_PMEM_CAMERA_SIZE,
+*/
 	.ram_console_start = MSM_RAM_CONSOLE_BASE,
 	.ram_console_size = MSM_RAM_CONSOLE_SIZE,
 	.kgsl_start = MSM_GPU_MEM_BASE,
