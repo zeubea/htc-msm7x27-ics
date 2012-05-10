@@ -20,6 +20,8 @@
 #include <asm/pgtable.h>
 #include <asm/io.h>
 #include <asm/mach/map.h>
+#include <linux/memory_alloc.h>
+#include <mach/msm_memtypes.h>
 #include <asm/cacheflush.h>
 
 int arch_io_remap_pfn_range(struct vm_area_struct *vma, unsigned long addr,
@@ -158,5 +160,11 @@ int platform_physical_low_power_pages(unsigned long start_pfn,
 {
 	return 1;
 }
+
+unsigned long allocate_contiguous_ebi_nomap(unsigned long size,unsigned long align)
+{
+	return _allocate_contiguous_memory_nomap(size, MEMTYPE_EBI0,align, __builtin_return_address(0));
+}
+EXPORT_SYMBOL(allocate_contiguous_ebi_nomap);
 
 

@@ -136,7 +136,7 @@ struct pmem_info {
 	/* index of the garbage page in the pmem space */
 	int garbage_index;
 
-	enum pmem_allocator_type no_allocator;
+	enum pmem_allocator_type allocator_type;
 
 	int (*allocate)(const int,
 			const unsigned long,
@@ -316,7 +316,7 @@ RO_PMEM_ATTR(size);
 
 static ssize_t show_pmem_allocator_type(int id, char *buf)
 {
-	switch (pmem[id].no_allocator) {
+	switch (pmem[id].allocator_type) {
 	case  PMEM_ALLOCATORTYPE_ALLORNOTHING:
 		return scnprintf(buf, PAGE_SIZE, "%s\n", "All or Nothing");
 	case  PMEM_ALLOCATORTYPE_BUDDYBESTFIT:
@@ -327,7 +327,7 @@ static ssize_t show_pmem_allocator_type(int id, char *buf)
 		return scnprintf(buf, PAGE_SIZE,
 			"??? Invalid allocator type (%d) for this region! "
 			"Something isn't right.\n",
-			pmem[id].no_allocator);
+			pmem[id].allocator_type);
 	}
 }
 RO_PMEM_ATTR(allocator_type);
@@ -1633,16 +1633,16 @@ retry_memalloc:
 
 #if PMEM_DEBUG
 	if (align != PMEM_ALIGN_4K &&
-			(pmem[info_id].no_allocator ==
+			(pmem[info_id].allocator_type ==
 				PMEM_ALLOCATORTYPE_ALLORNOTHING ||
-			pmem[info_id].no_allocator ==
+			pmem[info_id].allocator_type ==
 				PMEM_ALLOCATORTYPE_BUDDYBESTFIT))
 		printk(KERN_WARNING "pmem: %s: alignment other than on 4K "
 			"pages not supported with %s allocator for PMEM "
 			"memory region '%s'. Memory will be aligned to 4K "
 			"boundary. Check your board file or allocation "
 			"invocation.\n", __func__,
-			(pmem[info_id].no_allocator ==
+			(pmem[info_id].allocator_type ==
 				PMEM_ALLOCATORTYPE_ALLORNOTHING ?
 					"'All Or Nothing'"
 					:
@@ -2247,7 +2247,7 @@ int pmem_setup(struct android_pmem_platform_data *pdata,
 		goto err_no_mem;
 	}
 
-	pmem[id].no_allocator = pdata->no_allocator;
+	pmem[id].allocator_type = pdata->allocator_type;
 
 	for (i = 0; i < ARRAY_SIZE(kapi_memtypes); i++) {
 		if (!strcmp(kapi_memtypes[i].name, pdata->name)) {
@@ -2315,7 +2315,7 @@ int pmem_setup(struct android_pmem_platform_data *pdata,
 	memset(&pmem[id].kobj, 0, sizeof(pmem[0].kobj));
 	pmem[id].kobj.kset = pmem_kset;
 
-	switch (pmem[id].no_allocator) {
+	switch (pmem[id].allocator_type) {
 	case PMEM_ALLOCATORTYPE_ALLORNOTHING:
 		pmem[id].allocate = pmem_allocator_all_or_nothing;
 		pmem[id].free = pmem_free_all_or_nothing;
@@ -2409,7 +2409,7 @@ int pmem_setup(struct android_pmem_platform_data *pdata,
 
 	default:
 		printk(KERN_ALERT "Invalid allocator type (%d) for pmem "
-			"driver\n", pdata->no_allocator);
+			"driver\n", pdata->allocator_type);
 		goto err_reset_pmem_info;
 	}
 
@@ -2457,9 +2457,9 @@ error_cant_remap:
 err_cant_register_device:
 out_put_kobj:
 	kobject_put(&pmem[id].kobj);
-	if (pmem[id].no_allocator == PMEM_ALLOCATORTYPE_BUDDYBESTFIT)
+	if (pmem[id].allocator_type == PMEM_ALLOCATORTYPE_BUDDYBESTFIT)
 		kfree(pmem[id].allocator.buddy_bestfit.buddy_bitmap);
-	else if (pmem[id].no_allocator == PMEM_ALLOCATORTYPE_BITMAP) {
+	else if (pmem[id].allocator_type == PMEM_ALLOCATORTYPE_BITMAP) {
 		kfree(pmem[id].allocator.bitmap.bitmap);
 		kfree(pmem[id].allocator.bitmap.bitm_alloc);
 	}

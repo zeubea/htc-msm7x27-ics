@@ -130,7 +130,7 @@ struct android_pmem_platform_data
 
 	enum pmem_allocator_type allocator_type;
 	/* set to indicate the region should not be managed with an allocator */
-	enum pmem_allocator_type no_allocator;
+	//enum pmem_allocator_type no_allocator;
 	/* treated as a 'hidden' variable in the board files. Can be
 	 * set, but default is the system init value of 0 which becomes a
 	 * quantum of 4K pages.
