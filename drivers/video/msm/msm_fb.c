@@ -1313,9 +1313,9 @@ static int msmfb_probe(struct platform_device *pdev)
 		/* Flip buffer */
 		msmfb->update_info.left = 0;
 		msmfb->update_info.top = 0;
-		msmfb->update_info.eright = info->var.xres;
-		msmfb->update_info.ebottom = info->var.yres;
-		msmfb_pan_update(info, 0, 0, fb->var.xres,
+		msmfb->update_info.eright = fb->var.xres;
+		msmfb->update_info.ebottom = fb->var.yres;
+		msmfb_pan_update(fb, 0, 0, fb->var.xres,
 				 fb->var.yres, 0, 1);
 	}
 #endif
